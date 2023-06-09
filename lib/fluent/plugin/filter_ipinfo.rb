@@ -17,7 +17,7 @@ class ::Hash
 end
 
 module Fluent::Plugin
-  class IPinfoFilter < Filter
+  class IPinfoFilter < Fluent::Plugin::Filter
     # Register this filter as "passthru"
     Fluent::Plugin.register_filter('ipinfo', self)
 
@@ -33,12 +33,15 @@ module Fluent::Plugin
     desc 'The list of fields to fetch from ipinfo.'
     config_param :fields, :array, value_type: :string, :default => ['country_name', 'region', 'city', 'latitude', 'longitude']
 
-    def configure(conf)
+    def initialize
       super
-      # IPInfo handler:
       # "maxsize": 4096         # Number of entries to keep in cache
       # "ttl": 60 * 60 * 24 * 7 # Keep the data in cache for one week
       @ipinfo_settings = {:ttl => 604800, :maxsize => 4096}
+    end
+
+    def configure(conf)
+      super
       unless @access_token.nil?
         @ipinfo_handler = IPinfo::create(@access_token, @ipinfo_settings)
       else
