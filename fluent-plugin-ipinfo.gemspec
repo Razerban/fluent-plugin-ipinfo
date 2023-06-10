@@ -2,7 +2,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "fluent-plugin-ipinfo"
-  s.version     = "1.0.2"
+  s.version     = "1.1.0"
   s.license     = "Apache-2.0"
   s.authors     = ["Ahmed Abdelkafi"]
   s.email       = ["abdelkafiahmed@gmail.com"]
