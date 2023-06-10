@@ -51,14 +51,105 @@ class IPinfoFilterTest < Test::Unit::TestCase
     d.filtered_records
   end
 
+  sub_test_case 'plugin will use default values' do
+    test 'access_token nil' do
+      config = %[
+        @type ipinfo
+        access_token
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.access_token, nil
+    end
+
+    test 'access_token empty string' do
+      config = %[
+        @type ipinfo
+        access_token ""
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.access_token, nil
+    end
+
+    test 'key_name nil' do
+      config = %[
+        @type ipinfo
+        key_name
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.key_name, 'ip_address'
+    end
+
+    test 'key_name empty string' do
+      config = %[
+        @type ipinfo
+        key_name
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.key_name, 'ip_address'
+    end
+
+    test 'out_key nil' do
+      config = %[
+        @type ipinfo
+        out_key
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.out_key, 'ipinfo'
+    end
+
+    test 'out_key empty string' do
+      config = %[
+        @type ipinfo
+        out_key
+      ]
+      d = create_driver(config)
+      assert_equal d.instance.out_key, 'ipinfo'
+    end
+  end
+
+  sub_test_case 'plugin will raise Fluent::ConfigError' do
+    test 'empty fields' do
+      config = %[
+        @type ipinfo
+        fields []
+      ]
+      assert_raise Fluent::ConfigError do
+        create_driver(config)
+      end
+    end
+
+    test 'fields with one empty string' do
+      config = %[
+        @type ipinfo
+        fields [""]
+      ]
+      assert_raise Fluent::ConfigError do
+        create_driver(config)
+      end
+    end
+
+    test 'fields with multiple empty string' do
+      config = %[
+        @type ipinfo
+        fields [""]
+      ]
+      assert_raise Fluent::ConfigError do
+        create_driver(config)
+      end
+    end
+  end
+
   sub_test_case 'plugin will fetch geolocation data' do
     test 'add ipinfo to record with default fields' do
-      conf = CONFIG
+      config = CONFIG
       messages = [
-        { 'ip_address' => '8.8.8.8' }
+        {
+          'ip_address' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip_address' => '8.8.8.8',
+        {
+          'ip_address' => '8.8.8.8',
           'ipinfo' => {
             'country_name' => 'United States',
             'region' => 'California',
@@ -68,20 +159,23 @@ class IPinfoFilterTest < Test::Unit::TestCase
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom key_name' do
-      conf = %[
+      config = %[
         @type ipinfo
         key_name ip
       ]
       messages = [
-        { 'ip' => '8.8.8.8' }
+        {
+          'ip' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip' => '8.8.8.8',
+        {
+          'ip' => '8.8.8.8',
           'ipinfo' => {
             'country_name' => 'United States',
             'region' => 'California',
@@ -91,20 +185,23 @@ class IPinfoFilterTest < Test::Unit::TestCase
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom out_key' do
-      conf = %[
+      config = %[
         @type ipinfo
         out_key geodata
       ]
       messages = [
-        { 'ip_address' => '8.8.8.8' }
+        {
+          'ip_address' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip_address' => '8.8.8.8',
+        {
+          'ip_address' => '8.8.8.8',
           'geodata' => {
             'country_name' => 'United States',
             'region' => 'California',
@@ -114,62 +211,98 @@ class IPinfoFilterTest < Test::Unit::TestCase
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
+      assert_equal(expected, filtered_records)
+    end
+
+    test 'add ipinfo to record with custom out_key that is already defined' do
+      config = %[
+        @type ipinfo
+        out_key geodata
+      ]
+      messages = [
+        {
+          'ip_address' => '8.8.8.8',
+          'geodata' => 'bye!'
+        }
+      ]
+      expected = [
+        {
+          'ip_address' => '8.8.8.8',
+          'geodata' => {
+            'country_name' => 'United States',
+            'region' => 'California',
+            'city' => 'Mountain View',
+            'latitude' => '37.4056',
+            'longitude' => '-122.0775'
+          }
+        }
+      ]
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom fields' do
-      conf = %[
+      config = %[
         @type ipinfo
         fields ["country_name", "city"]
       ]
       messages = [
-        { 'ip_address' => '8.8.8.8' }
+        {
+          'ip_address' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip_address' => '8.8.8.8',
+        {
+          'ip_address' => '8.8.8.8',
           'ipinfo' => {
             'country_name' => 'United States',
             'city' => 'Mountain View'
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom key_name and custom fields' do
-      conf = %[
+      config = %[
         @type ipinfo
         key_name ip
         fields ["country_name", "city"]
       ]
       messages = [
-        { 'ip' => '8.8.8.8' }
+        {
+          'ip' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip' => '8.8.8.8',
+        {
+          'ip' => '8.8.8.8',
           'ipinfo' => {
             'country_name' => 'United States',
             'city' => 'Mountain View'
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom key_name and custom out_key' do
-      conf = %[
+      config = %[
         @type ipinfo
         key_name ip
         out_key geodata
       ]
       messages = [
-        { 'ip' => '8.8.8.8' }
+        {
+          'ip' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip' => '8.8.8.8',
+        {
+          'ip' => '8.8.8.8',
           'geodata' => {
             'country_name' => 'United States',
             'region' => 'California',
@@ -179,29 +312,32 @@ class IPinfoFilterTest < Test::Unit::TestCase
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
 
     test 'add ipinfo to record with custom key_name, custom out_name and custom fields' do
-      conf = %[
+      config = %[
         @type ipinfo
         key_name ip
         out_key geodata
         fields ["country_name", "city"]
       ]
       messages = [
-        { 'ip' => '8.8.8.8' }
+        {
+          'ip' => '8.8.8.8'
+        }
       ]
       expected = [
-        { 'ip' => '8.8.8.8',
+        {
+          'ip' => '8.8.8.8',
           'geodata' => {
             'country_name' => 'United States',
             'city' => 'Mountain View'
           }
         }
       ]
-      filtered_records = filter(conf, messages)
+      filtered_records = filter(config, messages)
       assert_equal(expected, filtered_records)
     end
   end

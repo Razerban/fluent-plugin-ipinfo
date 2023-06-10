@@ -39,7 +39,7 @@ In this example, the following event:
 }
 ```
 
-Would be enriched and returned as following:
+would be enriched and returned as following:
 
 ```json
 {
@@ -68,6 +68,8 @@ Would be enriched and returned as following:
 The token to be used with the IPInfo API for paid plans.
 To use the free plan (limited to 50k requests per month), do not use the `access_token` parameter.
 
+If the value provided for `access_token` is an empty string (`""` or `" "`), the default value (`nil`) is used instead.
+
 ### `key_name`
 
 | type | required | default |
@@ -76,6 +78,8 @@ To use the free plan (limited to 50k requests per month), do not use the `access
 
 The name of the key containing the IP address.
 
+If the value provided for `key_name` is an empty string (`""` or `" "`) or `nil`, the default value (`ip_address`) is used instead.
+
 ### `out_key`
 
 | type | required | default |
@@ -83,6 +87,46 @@ The name of the key containing the IP address.
 | string | false | `ipinfo` |
 
 The name of the key to store the geographical location data in.
+
+If the value provided for `out_key` is an empty string (`""` or `" "`) or `nil`, the default value (`ipinfo`) is used instead.
+
+If the record has already a key with the same name as the value of `out_key`, its value will be overwritten with the geographical location data as shown in the example below:
+
+```xml
+<filter foo.bar>
+  @type ipinfo
+  access_token 1a2b3c4d5e
+  key_name ip_address
+  out_key data
+  fields ["country_name", "region", "city", "latitude", "longitude"]
+</filter>
+```
+
+The following event:
+
+```json
+{
+    "message":"Can you get me the geographical location for this IP addresse ?",
+    "ip_address":"8.8.8.8",
+    "data": "This value is going to be overwritten."
+}
+```
+
+would be enriched and returned as following:
+
+```json
+{
+    "message": "Can you get me the geographical location for this IP addresse ?",
+    "ip_address": "8.8.8.8",
+    "data": {
+        "country_name": "United States",
+        "region": "California",
+        "city": "Mountain View",
+        "latitude": "37.4056",
+        "longitude": "-122.0775"
+    }
+}
+```
 
 ### `fields`
 
