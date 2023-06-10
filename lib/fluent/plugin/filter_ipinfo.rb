@@ -27,7 +27,7 @@ module Fluent::Plugin
     desc 'The name of the key containing the IP address.'
     config_param :key_name, :string, :default => 'ip_address'
 
-    desc 'The name of the key to store the geolocation data in.'
+    desc 'The name of the key to store the geographical location data in.'
     config_param :out_key, :string, :default => 'ipinfo'
 
     desc 'The list of fields to fetch from ipinfo.'

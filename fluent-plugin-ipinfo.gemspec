@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Ahmed Abdelkafi"]
   s.email       = ["abdelkafiahmed@gmail.com"]
   s.homepage    = "https://github.com/Razerban/fluent-plugin-ipinfo"
-  s.summary     = %q{Fluentd filter plugin. It fetches geolocation data of an IP address.}
+  s.summary     = %q{Fluentd filter plugin. It fetches geographical location data of an IP address.}
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
